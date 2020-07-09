@@ -1,10 +1,10 @@
 plugins {
-    id 'java'
-    id 'application'
+	id 'java'
+	id 'application'
 }
 
 repositories {
-    jcenter()
+	jcenter()
 }
 
 configurations {
@@ -21,35 +21,35 @@ dependencies {
 	implementation 'ch.qos.logback:logback-classic:1.2.3'
 	implementation 'com.google.code.gson:gson:2.8.6'
 	
-    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.6.2'
-    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.6.2'
-    externalTestRun 'org.junit.platform:junit-platform-console-standalone:1.6.2'
+	testImplementation 'org.junit.jupiter:junit-jupiter-api:5.6.2'
+	testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.6.2'
+	externalTestRun 'org.junit.platform:junit-platform-console-standalone:1.6.2'
 
 }
 
 test {
-    useJUnitPlatform()
+	useJUnitPlatform()
 }
 
 task prepareExternalTest(type: Copy, group: 'verification', description: 'Copys the offline JUnit runner to directory with compiled classes.') {
-    into "${buildDir}/classes/java"
-    from configurations.externalTestRun
+	into "${buildDir}/classes/java"
+	from configurations.externalTestRun
 }
 
 task exportDependencies(type: Copy, group: 'distribution', description: 'Exports the application dependencies into a export folder.') {
-    into "${buildDir}/export"
-    from configurations.runtimeClasspath
+	into "${buildDir}/export"
+	from configurations.runtimeClasspath
 }
 
 tasks.withType(Jar) {
-    destinationDirectory = file("${buildDir}/export")
+	destinationDirectory = file("${buildDir}/export")
 }
 
 jar {
 	dependsOn exportDependencies
-    manifest {
-        attributes 'Main-Class': 'javalibexport.JavaLibExport'
-    }
+	manifest {
+		attributes 'Main-Class': 'javalibexport.JavaLibExport'
+	}
 }
 
 task writeExecScripts(group: 'build', description: 'Writes the execute scripts.'){
