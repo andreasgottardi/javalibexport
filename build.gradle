@@ -37,12 +37,12 @@ task prepareExternalTest(type: Copy, group: 'verification', description: 'Copys 
 }
 
 task exportDependencies(type: Copy, group: 'distribution', description: 'Exports the application dependencies into a export folder.') {
-	into "${buildDir}/export"
+	into "${buildDir}/setup/lib"
 	from configurations.runtimeClasspath
 }
 
 tasks.withType(Jar) {
-	destinationDirectory = file("${buildDir}/export")
+	destinationDirectory = file("${buildDir}/setup/lib")
 }
 
 jar {
@@ -55,11 +55,24 @@ jar {
 task writeExecScripts(group: 'build', description: 'Writes the execute scripts.'){
 	dependsOn jar
 	doLast {
-		mkdir "${buildDir}/executables"
-		new File("${buildDir}/executables", "javalibexport.bat").text = '@echo off\r\ncd %~dp0\r\njava -cp "..\\export\\*" javalibexport.JavaLibExport\r\npause'
-		new File("${buildDir}/executables", "javalibexport.ps1").text = 'Set-Location "$PSScriptRoot"\r\nStart-Process -FilePath \'java\' -ArgumentList @(\'-cp\', \'..\\export\\*\', \'javalibexport.JavaLibExport\') -NoNewWindow -Wait\r\nRead-Host -Prompt \'Press enter to close the window\''
-		new File("${buildDir}/executables", "javalibexport.sh").text = '#!/bin/bash\ncd "$(dirname "$0")"\njava -cp "../export/*" javalibexport.JavaLibExport\nread -s -n 1 -p "Press any key to continue..."'
+		mkdir "${buildDir}/setup/bin"
+		new File("${buildDir}/setup/bin", "javalibexport.bat").text = '@echo off\r\ncd %~dp0\r\njava -cp "..\\lib\\*" javalibexport.JavaLibExport\r\npause'
+		new File("${buildDir}/setup/bin", "javalibexport.ps1").text = 'Set-Location "$PSScriptRoot"\r\nStart-Process -FilePath \'java\' -ArgumentList @(\'-cp\', \'..\\lib\\*\', \'javalibexport.JavaLibExport\') -NoNewWindow -Wait\r\nRead-Host -Prompt \'Press enter to close the window\''
+		new File("${buildDir}/setup/bin", "javalibexport.sh").text = '#!/bin/bash\ncd "$(dirname "$0")"\njava -cp "../lib/*" javalibexport.JavaLibExport\nread -s -n 1 -p "Press any key to continue..."'
 	}
 }
 
 compileJava.dependsOn clean
+
+task createSetup(type: Exec, description: "Builds basic installer.", group: "build setup") {
+	//doLast {
+	    dependsOn writeExecScripts
+	    mustRunAfter writeExecScripts
+		workingDir 'setup'
+		commandLine 'makensis.exe','/DVERSION='+version,'setup.nsi'
+		standardOutput = new ByteArrayOutputStream()
+		ext.output = {
+			return standardOutput.toString()
+		}
+	//}
+}
