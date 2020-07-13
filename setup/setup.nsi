@@ -2,6 +2,7 @@
 ;Include Modern UI
   !include "MUI2.nsh"
   !define MUI_ICON "icon.ico"
+  !define MUI_UNICON "icon.ico"
   !define MUI_HEADERIMAGE
   !define MUI_HEADERIMAGE_BITMAP "logo.bmp"
   !define MUI_HEADERIMAGE_RIGHT
